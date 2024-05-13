@@ -1,0 +1,60 @@
+name: Build
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - '*'
+    branches:
+      - master
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: debian:bookworm-backports
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Clone G729
+        uses: actions/checkout@v4
+        with:
+          repository: xadhoom/mod_bcg729
+          path: mod_bcg729
+      - name: Setup APT
+        run: sh apt.sh
+        env:
+          SW_PAT: ${{ secrets.SW_PAT }}
+      - name: Dependencies
+        # apt-get build-dep -y freeswitch &&
+        run: apt-get install -qqy cmake libfreeswitch-dev devscripts libbcg729-dev
+      - name: Build
+        run: make && mkdir -p release/usr/lib/freeswitch/mod && cp mod_bcg729.so release/usr/lib/freeswitch/mod && chmod 0644 release/usr/lib/freeswitch/mod/mod_bcg729.so
+        working-directory: mod_bcg729
+      - name: Package Prepare
+        run: cp -r DEBIAN mod_bcg729/release/
+      - name: Package
+        run: dpkg-deb --build ./release
+        working-directory: mod_bcg729
+      - uses: actions/upload-artifact@v4
+        with:
+          name: freeswitch-mod-bcg729
+          path: 'mod_bcg729/release.deb'
+      # - name: Run tmate
+      #   uses: mxschmitt/action-tmate@v3
+  post_build:
+    needs: [build]
+    runs-on: ubuntu-latest
+    container: ghcr.io/mygento/deployer:v5
+    steps:
+      - name: Download Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: freeswitch-mod-bcg729
+      # - name: Upload
+      #   if: startsWith(github.ref, 'refs/tags/') != true
+      #   run: sh upload.sh
+      #   env:
+      #     SERVICE: ${{ secrets.SERVICE }}
+      #     REALM: ${{ secrets.REALM }}
+      #     REALM_LOGIN: ${{ secrets.REALM_LOGIN }}
+      #     REALM_PASS: ${{ secrets.REALM_PASS }}
