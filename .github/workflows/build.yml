@@ -46,15 +46,19 @@ jobs:
     runs-on: ubuntu-latest
     container: ghcr.io/mygento/deployer:v5
     steps:
+      - name: Checkout Project
+        uses: actions/checkout@v4
       - name: Download Artifact
         uses: actions/download-artifact@v4
         with:
           name: freeswitch-mod-bcg729
-      # - name: Upload
-      #   if: startsWith(github.ref, 'refs/tags/') != true
-      #   run: sh upload.sh
-      #   env:
-      #     SERVICE: ${{ secrets.SERVICE }}
-      #     REALM: ${{ secrets.REALM }}
-      #     REALM_LOGIN: ${{ secrets.REALM_LOGIN }}
-      #     REALM_PASS: ${{ secrets.REALM_PASS }}
+      - name: Rename
+        run: mv release.deb freeswitch-mod-bcg729_1.1.1-0.deb
+      - name: Upload
+        if: startsWith(github.ref, 'refs/tags/') != true
+        run: sh upload.sh
+        env:
+          SERVICE: ${{ secrets.SERVICE }}
+          REALM: ${{ secrets.REALM }}
+          REALM_LOGIN: ${{ secrets.REALM_LOGIN }}
+          REALM_PASS: ${{ secrets.REALM_PASS }}

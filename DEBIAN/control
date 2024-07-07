@@ -6,6 +6,6 @@ Essential: no
 Priority: optional
 Section: comm
 Depends: freeswitch (>= 1.4.23),libbcg729-0
-Maintainer: Nikita Tarasovb <nikita@mygento.com>
+Maintainer: Nikita Tarasov <nikita@mygento.com>
 Homepage: https://freeswitch.org/
 Description: Freeswitch G729 module
