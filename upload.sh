@@ -6,4 +6,4 @@ if [ -f equal ]; then
 fi
 
 RELEASE=$(echo *.deb | tr ' ' ',')
-deployer upload --distro bookworm public_apt "$RELEASE"
+deployer upload --distro "$(lsb_release -cs)" public_apt "$RELEASE"
